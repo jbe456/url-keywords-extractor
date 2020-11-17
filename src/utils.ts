@@ -7,7 +7,8 @@ import { Cache } from "cache-manager";
 
 export type ExtractOptions = {
   urls?: string[];
-  query?: string;
+  input?: string;
+  columnName?: string;
   output: string;
   cacheExpiry: number;
   cachePath: string;
@@ -20,7 +21,7 @@ type ExportOptions = {
 
 export type ExtractUrlOptions = { cache: Cache; url: string };
 
-export type UrlInfo = { url: string; textContent: string };
+export type UrlInfo = { url: string; textContent: string; status: number };
 
 export const exportData = ({ content, filePath }: ExportOptions) => {
   const parsedPath = path.parse(filePath);
@@ -72,5 +73,8 @@ export const printExtractSummary = ({
   filePath: string;
   urlInfos: UrlInfo[];
 }) => {
-  console.log(`${urlInfos.length} results exported at ${filePath}!`);
+  console.log(`${urlInfos.length} urls scanned exported at ${filePath}!`);
+  const statusReport = _.countBy(urlInfos, "status");
+  console.log("Report details by status:");
+  console.log(`${JSON.stringify(statusReport, null, 2)}`);
 };

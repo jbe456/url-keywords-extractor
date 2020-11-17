@@ -11,10 +11,29 @@ yargs
     "Extract from a list of one or multiple space separated urls",
     (yargs) => {
       yargs
+        .check(function (argv) {
+          if (
+            (argv.urls && !argv.input && !argv.columnName) ||
+            (!argv.urls && argv.input && argv.columnName)
+          ) {
+            return true;
+          } else {
+            throw new Error(
+              "Error: pass at least one of 'urls' or 'input' and 'columnName' options but not both."
+            );
+          }
+        })
         .option("urls", {
           type: "array",
-          required: true,
           description: "A list of space-separated urls to extract content from",
+        })
+        .option("input", {
+          type: "string",
+          description: "CSV source to extract urls from",
+        })
+        .option("columnName", {
+          type: "string",
+          description: "Column name from input file to extract urls",
         })
         .option("output", {
           type: "string",

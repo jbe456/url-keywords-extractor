@@ -11,7 +11,9 @@ import {
 } from "./utils";
 import _ from "lodash";
 import fetch from "node-fetch";
-import { parse } from "node-html-parser";
+import { parse as parseDom } from "node-html-parser";
+import fs from "fs";
+import parseCSV from "csv-parse/lib/sync";
 
 const extractUrl = async ({ cache, url }: ExtractUrlOptions) =>
   await cache.wrap(`http-get-${url}`, async () => {
@@ -27,13 +29,19 @@ const extractUrl = async ({ cache, url }: ExtractUrlOptions) =>
       if (result.status == 200) {
         return result.text();
       } else {
-        throw new Error(`Failed to fetch ${url}. Status: ${result.status}`);
+        const e: any = new Error(
+          `Failed to fetch ${url}. Status: ${result.status}`
+        );
+        e.status = result.status;
+        throw e;
       }
     });
   });
 
 export const extract = async ({
   urls,
+  columnName,
+  input,
   output,
   cacheExpiry,
   cachePath,
@@ -43,13 +51,20 @@ export const extract = async ({
     path: cachePath,
   });
 
+  let urlsToScan = urls;
+  if (input && columnName) {
+    const inputFile = fs.readFileSync(input, { encoding: "utf-8" });
+    const csv = parseCSV(inputFile, { columns: true });
+    urlsToScan = csv.map((row: any) => row[columnName]);
+  }
+
   // get urls content
   const urlInfos: UrlInfo[] = await Promise.all(
-    urls.map(async (url) => {
+    urlsToScan.map(async (url) => {
       try {
         const html = await extractUrl({ cache, url });
 
-        const dom = parse(html);
+        const dom = parseDom(html);
 
         // remove script, noscript, style if any
         dom.querySelectorAll("script, style, noscript").forEach((element) => {
@@ -73,10 +88,10 @@ export const extract = async ({
         const textContent = content.innerText
           .replace(/\r|\n|\t|&nbsp;/g, " ")
           .replace(/( )+/g, " ");
-        return { url, textContent };
+        return { url, textContent, status: 200 };
       } catch (e) {
         console.log(e.message);
-        return { url, textContent: "" };
+        return { url, textContent: "", status: e.status };
       }
     })
   );
