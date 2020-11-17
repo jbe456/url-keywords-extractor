@@ -24,7 +24,7 @@ Examples:
 
 #### extract
 
-```
+```console
 > uke extract --help
 uke extract
 
