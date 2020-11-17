@@ -3,12 +3,16 @@ import yargs from "yargs";
 import { extract } from "./extract";
 
 yargs
-  .scriptName("uce")
+  .scriptName("uke")
   .usage("$0 extract --help")
-  .example("$0 extract --urls urlA", "Extract content from a list of urls")
+  .example("$0 extract --urls urlA", "Extract keywords from a list of urls")
+  .example(
+    "$0 extract --input urls.csv --columnName URL",
+    "Extract keywords from a list of urls provided by urls.csv via column URL"
+  )
   .command(
     "extract",
-    "Extract from a list of one or multiple space separated urls",
+    "Extract keywords from a list of one or multiple space separated urls",
     (yargs) => {
       yargs
         .check(function (argv) {
@@ -25,7 +29,8 @@ yargs
         })
         .option("urls", {
           type: "array",
-          description: "A list of space-separated urls to extract content from",
+          description:
+            "A list of space-separated urls to extract keywords from",
         })
         .option("input", {
           type: "string",
@@ -47,7 +52,7 @@ yargs
         })
         .option("cachePath", {
           type: "number",
-          default: "uce-cache",
+          default: "uke-cache",
           description: "Path to the cache folder.",
         });
     },

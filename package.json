@@ -2,7 +2,7 @@
   "version": "0.1",
   "license": "MIT",
   "bin": {
-    "uce": "dist/index"
+    "uke": "dist/index"
   },
   "dependencies": {
     "@types/cache-manager": "^2.10.3",
